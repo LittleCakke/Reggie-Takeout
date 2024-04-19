@@ -107,4 +107,18 @@ public class EmployeeController
 
         return R.success(pageModel);
     }
+
+    /**
+     * 根据ID修改员工信息
+     */
+    @PutMapping
+    public R<String> update(HttpServletRequest request, @RequestBody Employee employee)
+    {
+        String time = SDF.format(System.currentTimeMillis());
+        employee.setUpdateTime(time);
+        employee.setUpdateUser((Long) request.getSession().getAttribute("employee"));
+
+        employeeService.updateById(employee);
+        return R.success("员工信息修改成功");
+    }
 }
