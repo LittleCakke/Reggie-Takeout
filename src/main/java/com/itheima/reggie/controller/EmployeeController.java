@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
+
 /**
  * @author GRS
  * @since 2024/4/18 下午2:30
@@ -19,6 +21,9 @@ public class EmployeeController
 {
     @Resource
     private EmployeeService employeeService;
+
+    private static final SimpleDateFormat SDF =
+        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /**
      * 员工登录
@@ -57,5 +62,28 @@ public class EmployeeController
         // 清理Session中保存的当前登录员工的ID
         request.getSession().removeAttribute("employee");
         return R.success("退出成功");
+    }
+
+    /**
+     * 新增员工
+     */
+    @PostMapping
+    public R<String> save(HttpServletRequest request, @RequestBody Employee employee)
+    {
+        employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
+
+        String time = SDF.format(System.currentTimeMillis());
+        employee.setCreateTime(time);
+        employee.setUpdateTime(time);
+
+        // 获得当前登录用户的ID
+        long empId = (Long) request.getSession().getAttribute("employee");
+
+        employee.setCreateUser(empId);
+        employee.setUpdateUser(empId);
+
+        employeeService.save(employee);
+
+        return R.success("员工添加成功");
     }
 }
